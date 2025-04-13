@@ -1,4 +1,5 @@
 ﻿using Demo.DAL.Entities.Common.Enums;
+using Demo.DAL.Entities.Departments;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,5 +20,10 @@ namespace Demo.DAL.Entities.Employess
         public DateOnly HiringDate { get; set; }
         public Gender Gender { get; set; }
         public EmployeeType EmpolyeeType { get; set; }
+        //Navgitonal property [One]
+        public virtual Department? Department { get; set; }
+        //Foreign key
+        public int? DepartmentId { get; set; }
+        public string? Image {  get; set; }
     }
 }

@@ -16,20 +16,5 @@ namespace Demo.DAL.Presistance.Repostories.Departments
         public DepartmentRepository(ApplicationDbContext dbContext) : base(dbContext)
         {
         }
-
-        public int AddDepartment(Department depatmentCreated)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int DeleteDepartment(Department department)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int UpdateDepartment(Department depatmentUpdated)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

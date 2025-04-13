@@ -2,7 +2,21 @@
 @{
     ViewData["Title"] = "Index";
 }
-
+@if(!string.IsNullOrEmpty(TempData["Message"] as string))
+{
+    <div aria-live="polite" aria-atomic="true" class="tost-container position-fixed p-3" style="bottom: 25px; right:25px; z-index:100;">
+        <div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto text-success">Success!!</strong>
+                <small>Just now</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                @TempData["Message"]
+            </div>
+        </div>
+    </div>
+}
 <h1>All Departments</h1>
 <br />
 <br />
@@ -28,24 +42,7 @@
                     <td>@department.Code</td>
                     <td>@department.Name</td>
                     <td>@department.CreationDate</td>
-                    <td>
-                        <a class="btn btn-primary" asp-controller="Department" asp-action="Details" asp-route-id="@department.Id">
-                            <i class="fas fa-eye"></i>Details
-                        </a>
-                    </td>
-                    <td>
-                        <a class="btn btn-success" asp-controller="Department" asp-action="Edit" asp-route-id="@department.Id">
-                            <i class="fas fa-edit"></i>Update
-                        </a>
-                    </td>
-                    <td>
-                        @* <a class="btn btn-danger" asp-controller="Department" asp-action="Delete" asp-route-id="@department.Id"> *@
-                        @*     <i class="fas fa-trash"></i>Delete *@
-                        @* </a> *@
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </td>
+                   <partial name="_ButtonsPartial" model="@department.Id.ToString()"/>
                 </tr>
 
                 <!-- Delete Modal -->

@@ -10,8 +10,5 @@ namespace Demo.DAL.Presistance.Repostories.Departments
 {
     public interface IDepartmentRepository : IGenericRepository<Department>
     {
-        int AddDepartment(Department depatmentCreated);
-        int DeleteDepartment(Department department);
-        int UpdateDepartment(Department depatmentUpdated);
     }
 }

@@ -1,0 +1,36 @@
+﻿@model UserViewModel
+@inject IDepartmentService departmentService
+@{
+    ViewData["Title"] = "Edit";
+    var Departments = new SelectList(await departmentService.GetAllDepartments(), nameof(DepartmentToReturnDto.Id), nameof(DepartmentToReturnDto.Name));
+}
+
+<div class="row justify-content-center align-content-center mt-3">
+    <h1 class="col-8 my-4">Edit Employee</h1>
+    <form method="post" class="col-8" asp-controller="User" asp-action="Edit" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly"></div>
+        <div class="form-group mb-3">
+            <label class="form-label" asp-for="Email"></label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label class="form-label" asp-for="FName"></label>
+            <input asp-for="FName" class="form-control"/>
+            <span asp-validation-for="FName" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label class="form-label" asp-for="LName"></label>
+            <input asp-for="LName" class="form-control" />
+            <span asp-validation-for="LName" class="text-danger"></span>
+        </div>
+        <div class="mt-4 m-auto">
+            <input class="btn btn-success" type="submit" value="Edit" />
+            <a asp-controller="User" asp-action="Index" class="btn btn-outline-dark">Back to list</a>
+        </div>
+    </form>
+</div>
+
+@section ValidationScript {
+    <partial name="_ValidationScriptsPartial" />
+}

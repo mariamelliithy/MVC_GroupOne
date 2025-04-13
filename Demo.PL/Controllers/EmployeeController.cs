@@ -1,56 +1,72 @@
 ﻿using Demo.BLL.Dtos.Employees;
+using Demo.BLL.Services.Departments;
 using Demo.BLL.Services.Employees;
+using Demo.DAL.Entities.Common.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Demo.PL.Controllers
 {
-    //EmployeeController : Inhiertance [is a controller]
-    //EmployeeController : Composition [has a Employee service]
-    public class EmployeeController : Controller
-    {
-        private readonly IEmployeeService _employeeService;
-        private readonly ILogger<EmployeeController> _logger;
-        private readonly IWebHostEnvironment _env;
+    [Authorize]
+        #region Services
 
-        public EmployeeController(IEmployeeService employeeService, ILogger<EmployeeController> logger, IWebHostEnvironment env) 
+        //EmployeeController : Inhiertance [is a controller]
+        //EmployeeController : Composition [has a Employee service]
+        public class EmployeeController : Controller
         {
-            _employeeService = employeeService;
-            _logger = logger;
-            _env = env;
-        }
+            private readonly IEmployeeService _employeeService;
+            private readonly ILogger<EmployeeController> _logger;
+            private readonly IWebHostEnvironment _env;
+
+            public EmployeeController(IEmployeeService employeeService, ILogger<EmployeeController> logger, IWebHostEnvironment env)
+            {
+                _employeeService = employeeService;
+                _logger = logger;
+                _env = env;
+            }
+        #endregion
+
+        #region Index
+
         //Action ==> master action
         //Get : baseUrl/Employee
         //Get : baseUrl/Employee/Index
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string SearchValue)
         {
-            var employee = _employeeService.GetAllEmployees();
+            var employee =await _employeeService.GetAllEmployees(SearchValue);
             return View(employee);
         }
+        #endregion
+
+        #region Create
         [HttpGet]
-        public IActionResult Create() 
+        public IActionResult Create(/*[FromServices] IDepartmentService departmentService*/)
         {
+            //ViewData["Departments"] = departmentService.GetAllDepartments();
             return View();
         }
         [HttpPost]
-        public IActionResult Create(EmployeeToCreateDto employeeDto) 
+        [ValidateAntiForgeryToken] //Action filter
+        public async Task<IActionResult> Create(EmployeeToCreateDto employeeDto)
         {
-            if(!ModelState.IsValid) 
+            if (!ModelState.IsValid)
                 return View(employeeDto);
             var message = string.Empty;
             try
             {
-                var result = _employeeService.CreateEmployee(employeeDto);
+                var result =await _employeeService.CreateEmployee(employeeDto);
                 if (result > 0)
-                    return RedirectToAction(nameof(Index));
+                    TempData["Message"] = "Employee created successfully";
                 else
                 {
                     message = "Employee can not be created";
                     ModelState.AddModelError(string.Empty, message);
-                    return View(employeeDto);
+
                 }
+                return RedirectToAction(nameof(Index));
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
                 if (_env.IsDevelopment())
@@ -65,90 +81,107 @@ namespace Demo.PL.Controllers
                 }
             }
         }
+        #endregion
+
+        #region Details
         [HttpGet]
-        public IActionResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
-            if(id is null)
+            if (id is null)
                 return BadRequest(); //400
-            var employee = _employeeService.GetEmployeeById(id.Value);
+            var employee =await _employeeService.GetEmployeeById(id.Value);
             if (employee is null)
                 return NotFound(); //404
             return View(employee);
         }
-        //[HttpGet]
-        //public IActionResult Edit(int? id)
-        //{
-        //    if (id is null)
-        //        return BadRequest();
-        //    var employee = _employeeService.GetEmployeeById(id.Value);
-        //    if(employee is null)
-        //        return NotFound();
-        //    return View(new DepartmentEditViewModel()
-        //    {
-        //        Code = department.Code,
-        //        Name = department.Name,
-        //        Description = department.Description,
-        //        CreationDate = department.CreationDate,
-        //    });
-        //}
-        //[HttpPost]
-        //public IActionResult Edit(int id ,DepartmentEditViewModel departmentVM)
-        //{
-        //    if(!ModelState.IsValid)
-        //        return View(departmentVM);
-        //    var message = string.Empty;
-        //    try
-        //    {
-        //        var result = _departmentService.UpdateDepartment(new DepartmentToUpdateDto()
-        //        {
-        //            Id = id,
-        //            Code = departmentVM.Code,
-        //            Name = departmentVM.Name,
-        //            Description = departmentVM.Description,
-        //            CreationDate = departmentVM.CreationDate,
-        //        });
-        //        if(result >  0)
-        //            return RedirectToAction(nameof(Index));
-        //        else
-        //        {
-        //            message = "Department can not be updated";
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        message = _env.IsDevelopment() ? ex.Message :  "Department can not be updated";
-        //    }
-        //    return View(departmentVM);
-        //}
+        #endregion
+
+        #region Edit
         [HttpGet]
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id is null)
                 return BadRequest();
-            var employee = _employeeService.GetEmployeeById(id.Value);
-            if(employee is null)
+            var employee =await _employeeService.GetEmployeeById(id.Value);
+            if (employee is null)
+                return NotFound();
+            return View(new EmployeeToUpdateDto()
+            {
+                Name = employee.Name,
+                Address = employee.Address,
+                Email = employee.Email,
+                Age = employee.Age,
+                IsActive = employee.IsActive,
+                PhoneNumber = employee.PhoneNumber,
+                HiringDate = employee.HiringDate,
+                Id = id.Value,
+                Salary = employee.Salary,
+                EmpolyeeType = Enum.TryParse<EmployeeType>(employee.EmpolyeeType, out var empType) ? empType : default,
+                Gender = Enum.TryParse<Gender>(employee.Gender, out var gender) ? gender : default,
+            });
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken] //Action filter
+        public async Task<IActionResult> Edit(int id, EmployeeToUpdateDto employeeDto)
+        {
+            if (!ModelState.IsValid)
+                return View(employeeDto);
+            var message = string.Empty;
+            try
+            {
+                var result =await _employeeService.UpdateEmployee(employeeDto);
+                if (result > 0)
+                    TempData["Message"] = "Employee Updated successfully";
+                else
+                {
+                    message = "Employee can not be updated";
+                    TempData["Message"] = message;
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                message = _env.IsDevelopment() ? ex.Message : "Employee can not be updated";
+            }
+            return View(employeeDto);
+        }
+        #endregion
+
+        #region Delete
+        [HttpGet]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id is null)
+                return BadRequest();
+            var employee =await _employeeService.GetEmployeeById(id.Value);
+            if (employee is null)
                 return NotFound();
             return View(employee);
 
         }
         [HttpPost]
-        public IActionResult Delete(int id)
+        [ValidateAntiForgeryToken] //Action filter
+        public async Task<IActionResult> Delete(int id)
         {
-            var result = _employeeService.DeleteEmployee(id);
+            var result =await _employeeService.DeleteEmployee(id);
             var message = string.Empty;
             try
             {
                 if (result)
-                    return RedirectToAction(nameof(Index));
+                    TempData["Message"] = "Employee Deleted successfully";
                 message = "An error happend when deleting the employee";
+                return RedirectToAction(nameof(Index));
+
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, ex.Message);
                 message = _env.IsDevelopment() ? ex.Message : "An error happend when deleting the employee";
             }
             ModelState.AddModelError(string.Empty, message);
             return View(nameof(Index));
-        }
+        } 
+        #endregion
+
     }
 }
