@@ -9,11 +9,11 @@ namespace Demo.DAL.Presistance.Repostories.Generic
 {
     public interface IGenericRepository<T> where T : ModelBase
     {
-        IEnumerable<T> GetAll(bool AsNoTracking = true);
+        Task<IEnumerable<T>> GetAll(bool AsNoTracking = true);
         IQueryable<T> GetAllQueryable();
-        T? GetById(int id);
-        int AddT(T entity);
-        int UpdateT(T entity);
-        int DeleteT(T entity);
+        Task<T?> GetById(int id);
+        void AddT(T entity);
+        void UpdateT(T entity);
+        void DeleteT(T entity);
     }
 }

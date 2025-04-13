@@ -1,6 +1,7 @@
 ﻿using Demo.BLL.Dtos.Departments;
 using Demo.DAL.Entities.Departments;
 using Demo.DAL.Presistance.Repostories.Departments;
+using Demo.DAL.Presistance.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -12,28 +13,34 @@ namespace Demo.BLL.Services.Departments
 {
     public class DepartmentService : IDepartmentService
     {
-        private readonly IDepartmentRepository _departmentRepository;
+        //private readonly IDepartmentRepository _departmentRepository;
+        //public DepartmentService(IDepartmentRepository departmentRepository) 
+        //{
+        //    _departmentRepository = departmentRepository;
+        //}
 
-        public DepartmentService(IDepartmentRepository departmentRepository) 
+        private readonly IUnitOfWork _unitOfWork;
+        public DepartmentService(IUnitOfWork unitOfWork) 
         {
-            _departmentRepository = departmentRepository;
+            _unitOfWork = unitOfWork;
         }
-        public IEnumerable<DepartmentToReturnDto> GetAllDepartments()
+
+        public async Task<IEnumerable<DepartmentToReturnDto>> GetAllDepartments()
         {
-            var departments = _departmentRepository.GetAllQueryable().Where(D => !D.IsDeleted).Select(department => new DepartmentToReturnDto
+            var departments = await _unitOfWork.DepartmentRepository.GetAllQueryable().Where(D => !D.IsDeleted).Select(department => new DepartmentToReturnDto
             {
                 //Description = department.Description,
                 CreationDate = department.CreationDate,
                 Code = department.Code,
                 Id = department.Id,
                 Name = department.Name
-            }).AsNoTracking().ToList();
+            }).AsNoTracking().ToListAsync();
             return departments;
         }
 
-        public DepartmentDetailsToReturnDto? GetDepartmentById(int id)
+        public async Task<DepartmentDetailsToReturnDto?> GetDepartmentById(int id)
         {
-            var department = _departmentRepository.GetById(id);
+            var department = await _unitOfWork.DepartmentRepository.GetById(id);
             if (department is not null)  //department != null , department is {}
             {
                 return new DepartmentDetailsToReturnDto()
@@ -53,7 +60,7 @@ namespace Demo.BLL.Services.Departments
             return null;
         }
 
-        public int CreateDepartment(DepartmentToCreateDto department)
+        public async Task<int> CreateDepartment(DepartmentToCreateDto department)
         {
             var depatmentCreated = new Department()
             {
@@ -65,10 +72,11 @@ namespace Demo.BLL.Services.Departments
                 CreatedBy = 1,
                 LastModifiedOn = DateTime.UtcNow
             };
-            return _departmentRepository.AddDepartment(depatmentCreated);
+            _unitOfWork.DepartmentRepository.AddT(depatmentCreated);
+            return await _unitOfWork.Complete();
         }
 
-        public int UpdateDepartment(DepartmentToUpdateDto department)
+        public async Task<int> UpdateDepartment(DepartmentToUpdateDto department)
         {
             var depatmentUpdated = new Department()
             {
@@ -81,17 +89,17 @@ namespace Demo.BLL.Services.Departments
                 CreatedBy = 1,
                 LastModifiedOn = DateTime.UtcNow
             };
-            return _departmentRepository.UpdateDepartment(depatmentUpdated);
+            _unitOfWork.DepartmentRepository.UpdateT(depatmentUpdated);
+            return await _unitOfWork.Complete();
         }
 
-        public bool DeleteDepartment(int id)
+        public async Task<bool> DeleteDepartment(int id)
         {
-            var department = _departmentRepository.GetById(id);
+            var departmentRepo = _unitOfWork.DepartmentRepository;
+            var department = await departmentRepo.GetById(id);
             if (department is not null) 
-            {
-                return _departmentRepository.DeleteDepartment(department) > 0;
-            }
-            return false;
+                departmentRepo.DeleteT(department);
+            return await _unitOfWork.Complete() > 0;
         }
     }
 }

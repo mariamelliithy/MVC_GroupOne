@@ -1,0 +1,38 @@
+﻿@model RoleViewModel
+@inject IDepartmentService departmentService
+@{
+    ViewData["Title"] = "Edit";
+    var Departments = new SelectList(await departmentService.GetAllDepartments(), nameof(DepartmentToReturnDto.Id), nameof(DepartmentToReturnDto.Name));
+}
+
+<div class="row justify-content-center align-content-center mt-3">
+    <h1 class="col-8 my-4">Edit Role</h1>
+    <form method="post" class="col-8" asp-controller="Role" asp-action="Edit" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly"></div>
+        <div class="form-group mb-3">
+            <label class="form-label" asp-for="Name"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <h3>Assign Users To Roles</h3>
+        <div class="form-group">
+            @for(int i =0; i < Model.Users.Count; i++){
+                <div class="form-check">
+                    <input type="hidden" asp-for="Users[i].UserId"/>
+                    <input type="hidden" asp-for="Users[i].UserName"/>
+
+                    <input asp-for="Users[i].IsSelected" class="form-check-input" />
+                    <label class="form-check-label">@Model.Users[i].UserName</label>
+                </div>
+            }
+        </div>
+        <div class="mt-4 m-auto">
+            <input class="btn btn-success" type="submit" value="Edit" />
+            <a asp-controller="User" asp-action="Index" class="btn btn-outline-dark">Back to list</a>
+        </div>
+    </form>
+</div>
+
+@section ValidationScript {
+    <partial name="_ValidationScriptsPartial" />
+}

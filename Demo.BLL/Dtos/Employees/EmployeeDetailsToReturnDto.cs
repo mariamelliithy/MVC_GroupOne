@@ -24,6 +24,7 @@ namespace Demo.BLL.Dtos.Employees
         public DateTime CreatedOn { get; set; }
         public int LastModifiedBy { get; set; }
         public DateTime LastModifiedOn { get; set; }
-        public bool IsDeleted { get; set; }
+        public string? Department { get; set; }
+        public string? Image { get; set; }
     }
 }

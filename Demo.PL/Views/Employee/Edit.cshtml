@@ -1,34 +1,88 @@
-﻿@model DepartmentEditViewModel
+﻿@model EmployeeToUpdateDto
+@inject IDepartmentService departmentService
 @{
     ViewData["Title"] = "Edit";
+    var Departments = new SelectList(await departmentService.GetAllDepartments(), nameof(DepartmentToReturnDto.Id), nameof(DepartmentToReturnDto.Name));
 }
 
 <div class="row justify-content-center align-content-center mt-3">
-    <h1 class="col-8 my-4">Edit Department</h1>
-    <form method="post" class="col-8" asp-controller="Department" asp-action="Edit">
+    <h1 class="col-8 my-4">Edit Employee</h1>
+    <form method="post" class="col-8" asp-controller="Employee" asp-action="Edit" enctype="multipart/form-data">
         <div asp-validation-summary="ModelOnly"></div>
-        <div class="form-group mb-3">
-            <label class="form-label" asp-for="Code">Code</label>
-            <input asp-for="Code" class="form-control" />
-            <span asp-validation-for="Code" class="text-danger"></span>
-        </div>
         <div class="form-group mb-3">
             <label class="form-label" asp-for="Name">Name</label>
             <input asp-for="Name" class="form-control" />
             <span asp-validation-for="Name" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
-            <label class="form-label" asp-for="Description">Description</label>
-            <textarea class="form-control" asp-for="Description"></textarea>
+            <label class="form-label" asp-for="Email">Email</label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
         </div>
         <div class="form-group mb-3">
-            <label class="form-label" asp-for="CreationDate">CreationDate</label>
-            <input type="date" asp-for="CreationDate" class="form-control" />
+            <label class="form-label" asp-for="Address">Address</label>
+            <input asp-for="Address" class="form-control"/>
+            <span asp-validation-for="Address" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label class="form-label" asp-for="PhoneNumber">Phone Number</label>
+            <input asp-for="PhoneNumber" class="form-control" />
+            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label class="form-label" asp-for="Age">Age</label>
+            <input asp-for="Age" class="form-control" />
+            <span asp-validation-for="Age" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label class="form-label" asp-for="HiringDate">Hiring Date</label>
+            <input type="date" asp-for="HiringDate" class="form-control" />
+            <span asp-validation-for="HiringDate" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label class="form-label" asp-for="Salary">Salary</label>
+            <input asp-for="Salary" class="form-control" />
+            <span asp-validation-for="Salary" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label class="form-label" asp-for="Gender">Gender</label>
+            <div>
+                @foreach(Gender genderOption in Enum.GetValues(typeof(Gender)))
+                {
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" asp-for="Gender" value="@genderOption" />
+                        <label class="form-check-label">@genderOption</label>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="form-group mb-3">
+            <select asp-for="EmpolyeeType" asp-items="Html.GetEnumSelectList<EmployeeType>()" class="form-control">
+                <option value="">Select Employee Type</option>
+            </select>
+            <span asp-validation-for="EmpolyeeType" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-3">
+            <label class="form-label" asp-for="DepartmentId"></label>
+            <select asp-for="DepartmentId" asp-items="@Departments" class="form-control">
+                <option value="@null">Select Department</option>
+            </select>
+        </div>
+        <div class="form-group mb-3">
+            <label class="form-label" asp-for="Image">Image</label>
+            <input asp-for="Image" class="form-control" />
+        </div>
+        <div class="form-group mb-3">
+            <input  asp-for="IsActive" class="fform-check-input" />
+            <label class="col-form-label" asp-for="IsActive">Is Active</label>
         </div>
         <div class="mt-4 m-auto">
             <input class="btn btn-success" type="submit" value="Edit" />
-            <a asp-controller="Department" asp-action="Index" class="btn btn-outline-dark">Back to list</a>
+            <a asp-controller="Employee" asp-action="Index" class="btn btn-outline-dark">Back to list</a>
         </div>
     </form>
 </div>
 
+@section ValidationScript {
+    <partial name="_ValidationScriptsPartial" />
+}

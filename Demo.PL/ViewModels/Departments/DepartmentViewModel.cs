@@ -1,6 +1,6 @@
 ﻿namespace Demo.PL.ViewModels.Departments
 {
-    public class DepartmentEditViewModel
+    public class DepartmentViewModel
     {
         public string Name { get; set; } = null!;
         public string? Description { get; set; }
